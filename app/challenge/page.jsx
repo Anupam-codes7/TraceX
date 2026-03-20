@@ -1,17 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getTheoryLink } from '@/lib/theoryLinks';
 
 export default function ChallengePage() {
   const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
   const [solved, setSolved] = useState(false);
+  const [topic, setTopic] = useState('binary-search');
   const router = useRouter();
 
   useEffect(() => {
     const raw = sessionStorage.getItem('traceResult');
     if (raw) {
       const result = JSON.parse(raw);
+      setTopic(result.topic || 'binary-search');
       fetchChallenge(result.errorType);
     } else setLoading(false);
   }, []);
@@ -27,43 +30,37 @@ export default function ChallengePage() {
     } finally { setLoading(false); }
   }
 
-  const difficulty = getDifficulty(challenge?.title);
+  const theory = getTheoryLink(topic);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0f', fontFamily: 'JetBrains Mono, monospace', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0d1117', fontFamily: 'JetBrains Mono, monospace', position: 'relative' }}>
 
-      {/* Grid Background */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0,
-        backgroundImage: `linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px)`,
-        backgroundSize: '40px 40px',
-      }} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'radial-gradient(ellipse at 80% 20%, rgba(16,185,129,0.05) 0%, transparent 50%)' }} />
 
       {/* Solved Modal */}
       {solved && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 999,
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'fadeIn 0.3s ease',
         }}>
           <div style={{
-            background: '#13131a', border: '1px solid #10b981',
-            borderRadius: 20, padding: 48, textAlign: 'center', maxWidth: 400,
-            boxShadow: '0 0 60px rgba(16,185,129,0.3)',
+            background: '#161b22', border: '1px solid #10b98150',
+            borderRadius: 20, padding: 48, textAlign: 'center', maxWidth: 380,
+            animation: 'fadeIn 0.3s ease',
           }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🏆</div>
-            <h2 style={{ color: '#10b981', fontWeight: 800, marginBottom: 8, fontSize: 24 }}>Mission Complete!</h2>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
-              {'⭐'.repeat(difficulty.stars).split('').map((s, i) => (
-                <span key={i} style={{ fontSize: 24, animation: `starPop 0.3s ease ${i * 0.1}s both` }}>{s}</span>
-              ))}
-            </div>
-            <p style={{ color: '#6b6b80', fontSize: 13, marginBottom: 24, lineHeight: 1.7 }}>
-              +{difficulty.xp} XP earned. This error pattern has been logged. Keep practicing to eliminate it permanently.
+            <div style={{ fontSize: 60, marginBottom: 16 }}>🌟</div>
+            <h2 style={{ color: '#e6edf3', fontWeight: 800, marginBottom: 8, fontSize: 22 }}>
+              You did it! 🎉
+            </h2>
+            <p style={{ color: '#8b949e', fontSize: 13, marginBottom: 8, lineHeight: 1.7 }}>
+              Amazing work. You just practiced fixing a <span style={{ color: '#6c63ff' }}>{challenge?.title?.toLowerCase()}</span>.
+            </p>
+            <p style={{ color: '#6b6b80', fontSize: 12, marginBottom: 24, lineHeight: 1.7 }}>
+              TraceX has noted your progress. Keep this energy going! 🚀
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button onClick={() => router.push('/')} style={btnPrimary}>⚡ Analyze More Code</button>
-              <button onClick={() => setSolved(false)} style={btnSecondary}>Close</button>
+              <button onClick={() => router.push('/')} style={btnPrimary}>✏️ Practice More</button>
+              <button onClick={() => setSolved(false)} style={btnSecondary}>Stay here</button>
             </div>
           </div>
         </div>
@@ -71,147 +68,152 @@ export default function ChallengePage() {
 
       {/* Sidebar */}
       <aside style={{
-        width: 240, background: 'rgba(15,15,23,0.95)', borderRight: '1px solid #1e1e2e',
-        display: 'flex', flexDirection: 'column', padding: '24px 0',
+        width: 240, background: 'rgba(13,17,23,0.97)',
+        borderRight: '1px solid #21262d',
+        display: 'flex', flexDirection: 'column', padding: '28px 0',
         position: 'fixed', height: '100vh', zIndex: 10,
       }}>
-        <div style={{ padding: '0 20px 32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ padding: '0 20px 36px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <div style={{
-              width: 38, height: 38, borderRadius: '50%',
+              width: 38, height: 38, borderRadius: 12,
               background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 18, fontWeight: 800, color: '#fff',
             }}>T</div>
-            <span style={{ fontSize: 20, fontWeight: 800, color: '#6c63ff' }}>TraceX</span>
+            <span style={{ fontSize: 19, fontWeight: 800, color: '#e6edf3' }}>TraceX</span>
           </div>
-          <div style={{ marginTop: 8, fontSize: 10, color: '#6b6b80', letterSpacing: '2px' }}>HACKER ARENA</div>
+          <div style={{ fontSize: 10, color: '#6b6b80', letterSpacing: '2px', paddingLeft: 2 }}>your coding companion</div>
         </div>
 
         {[
-          { icon: '⚡', label: 'Analyze Code', active: false, href: '/' },
-          { icon: '🧠', label: 'Memory Log', active: false, href: '/feedback' },
-          { icon: '🎯', label: 'Challenges', active: true, href: '/challenge' },
+          { icon: '✏️', label: 'Practice', active: false, href: '/' },
+          { icon: '🧠', label: 'My Feedback', active: false, href: '/feedback' },
+          { icon: '🌱', label: 'Grow', active: true, href: '/challenge' },
         ].map(item => (
           <div key={item.label} onClick={() => router.push(item.href)} style={{
             display: 'flex', alignItems: 'center', gap: 12,
             padding: '13px 20px', cursor: 'pointer', fontSize: 13,
-            background: item.active ? '#6c63ff15' : 'transparent',
+            background: item.active ? '#6c63ff12' : 'transparent',
             borderLeft: item.active ? '3px solid #6c63ff' : '3px solid transparent',
-            color: item.active ? '#e8e8f0' : '#6b6b80', transition: 'all 0.2s',
+            color: item.active ? '#e6edf3' : '#6b6b80', transition: 'all 0.2s',
+            borderRadius: '0 8px 8px 0', marginRight: 12,
           }}>
             <span>{item.icon}</span>{item.label}
           </div>
         ))}
 
-        <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid #1e1e2e' }}>
+        <div style={{ margin: '24px 16px 0', padding: '16px', background: '#161b22', borderRadius: 14, border: '1px solid #21262d' }}>
+          <div style={{ fontSize: 20, marginBottom: 8 }}>💪</div>
+          <p style={{ fontSize: 12, color: '#8b949e', margin: 0, lineHeight: 1.7 }}>
+            Practice is how you grow. There's no timer here — take your time.
+          </p>
+        </div>
+
+        <div style={{ marginTop: 'auto', padding: '20px', borderTop: '1px solid #21262d' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#6c63ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>D</div>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg, #6c63ff, #a78bfa)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>D</div>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#e8e8f0' }}>Demo User</div>
-              <div style={{ fontSize: 10, color: '#6b6b80' }}>demo_user_001</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#e6edf3' }}>Demo User</div>
+              <div style={{ fontSize: 10, color: '#6b6b80' }}>learning every day 🌱</div>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Main */}
-      <main style={{ marginLeft: 240, flex: 1, padding: '40px', position: 'relative', zIndex: 1 }}>
+      <main style={{ marginLeft: 240, flex: 1, padding: '48px', position: 'relative', zIndex: 1 }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontSize: 11, color: '#f59e0b', letterSpacing: '4px', marginBottom: 8 }}>— MISSION BRIEFING —</div>
-          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#e8e8f0', margin: '0 0 8px' }}>Targeted Challenge</h1>
-          <p style={{ color: '#6b6b80', fontSize: 13, margin: 0 }}>This mission targets your specific error pattern from the last analysis.</p>
+        <div style={{ marginBottom: 36 }}>
+          <div style={{ fontSize: 11, color: '#10b981', letterSpacing: '3px', marginBottom: 10 }}>TIME TO GROW 🌱</div>
+          <h1 style={{ fontSize: 36, fontWeight: 800, color: '#e6edf3', margin: '0 0 10px' }}>Practice Set</h1>
+          <p style={{ color: '#8b949e', fontSize: 13, margin: 0 }}>
+            This exercise is tailored to what you just worked on. No rush — think it through. 🙂
+          </p>
         </div>
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: 80, color: '#6b6b80' }}>
-            <div style={{ width: 40, height: 40, border: '3px solid #2a2a3a', borderTop: '3px solid #6c63ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-            <p style={{ fontSize: 13 }}>Loading your mission...</p>
+            <div style={{ width: 36, height: 36, border: '3px solid #21262d', borderTop: '3px solid #6c63ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+            <p style={{ fontSize: 13 }}>Picking the right exercise for you...</p>
           </div>
         ) : !challenge ? (
           <div style={{ textAlign: 'center', padding: 80 }}>
-            <p style={{ color: '#6b6b80', fontSize: 13 }}>No challenge found. <span onClick={() => router.push('/')} style={{ color: '#6c63ff', cursor: 'pointer' }}>Analyze code first →</span></p>
+            <p style={{ color: '#6b6b80', fontSize: 13 }}>
+              No exercise found. <span onClick={() => router.push('/')} style={{ color: '#6c63ff', cursor: 'pointer' }}>Go practice some code first →</span>
+            </p>
           </div>
         ) : (
-          <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <div style={{ maxWidth: 800, display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24 }}>
 
-            {/* Mission Card */}
+            {/* Challenge Card */}
             <div style={{
-              background: 'rgba(19,19,26,0.9)', borderRadius: 20,
-              border: '1px solid #2a2a3a', padding: 36,
-              boxShadow: '0 0 40px rgba(108,99,255,0.1)',
+              background: '#161b22', borderRadius: 18,
+              border: '1px solid #21262d', padding: 32,
               animation: 'fadeIn 0.5s ease',
             }}>
-              {/* Mission Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{
-                    background: '#f59e0b20', color: '#f59e0b',
-                    padding: '4px 14px', borderRadius: 20, fontSize: 11,
-                    fontWeight: 700, letterSpacing: '1px',
-                  }}>🎯 MISSION</span>
-                  <span style={{
-                    background: `${difficulty.color}20`, color: difficulty.color,
-                    padding: '4px 14px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-                  }}>{difficulty.label}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {[1, 2, 3].map(s => (
-                    <span key={s} style={{ fontSize: 18, opacity: s <= difficulty.stars ? 1 : 0.2 }}>⭐</span>
-                  ))}
-                </div>
-              </div>
+              <span style={{
+                background: '#10b98115', color: '#10b981',
+                padding: '4px 14px', borderRadius: 20,
+                fontSize: 11, fontWeight: 700, letterSpacing: '1px',
+              }}>🌱 PRACTICE SET</span>
 
-              <h2 style={{ fontSize: 24, fontWeight: 800, color: '#e8e8f0', marginBottom: 12 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: '#e6edf3', margin: '16px 0 10px' }}>
                 {challenge.title}
               </h2>
-              <p style={{ color: '#9898a8', lineHeight: 1.8, fontSize: 13, marginBottom: 28 }}>
+              <p style={{ color: '#8b949e', lineHeight: 1.8, fontSize: 13, marginBottom: 24 }}>
                 {challenge.description}
               </p>
 
               {/* Code Block */}
-              <div style={{
-                background: '#0a0a0f', borderRadius: 12, overflow: 'hidden',
-                border: '1px solid #1e1e2e', marginBottom: 20,
-              }}>
-                <div style={{
-                  background: '#13131a', padding: '10px 16px',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  borderBottom: '1px solid #1e1e2e',
-                }}>
+              <div style={{ background: '#0d1117', borderRadius: 12, overflow: 'hidden', border: '1px solid #21262d', marginBottom: 20 }}>
+                <div style={{ background: '#161b22', padding: '9px 16px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #21262d' }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b' }} />
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981' }} />
-                  <span style={{ marginLeft: 8, fontSize: 11, color: '#6b6b80' }}>buggy_code.java</span>
+                  <span style={{ marginLeft: 8, fontSize: 11, color: '#6b6b80' }}>exercise.java</span>
                 </div>
-                <pre style={{
-                  padding: 20, fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: 13, color: '#a8c8e8', lineHeight: 1.8,
-                  margin: 0, overflow: 'auto',
-                }}>{challenge.starterCode}</pre>
+                <pre style={{ padding: 20, fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#a8c8e8', lineHeight: 1.8, margin: 0, overflow: 'auto' }}>
+                  {challenge.starterCode}
+                </pre>
               </div>
 
               {/* Hint */}
-              <div style={{
-                background: '#f59e0b10', border: '1px solid #f59e0b30',
-                borderRadius: 10, padding: '12px 18px', marginBottom: 28,
-              }}>
-                <span style={{ fontSize: 13, color: '#f59e0b' }}>💡 Hint: {challenge.hint}</span>
+              <div style={{ background: '#f59e0b08', border: '1px solid #f59e0b25', borderRadius: 10, padding: '12px 16px', marginBottom: 24 }}>
+                <span style={{ fontSize: 12, color: '#f59e0b' }}>💡 Hint: {challenge.hint}</span>
               </div>
 
-              {/* XP Reward */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ fontSize: 13, color: '#6b6b80' }}>
-                  Reward: <span style={{ color: '#a78bfa', fontWeight: 700 }}>+{difficulty.xp} XP</span>
+              <button onClick={() => setSolved(true)} style={{
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#fff', border: 'none', borderRadius: 12,
+                padding: '13px 28px', fontSize: 13, fontWeight: 700,
+                cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace',
+              }}>✅ I fixed it!</button>
+            </div>
+
+            {/* Theory Card */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ background: '#161b22', borderRadius: 16, border: '1px solid #21262d', padding: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#e6edf3', marginBottom: 12 }}>
+                  📺 Watch & Learn
                 </div>
-                <button onClick={() => setSolved(true)} style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
-                  color: '#fff', border: 'none', borderRadius: 12,
-                  padding: '14px 32px', fontSize: 14, fontWeight: 700,
-                  cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace',
-                  boxShadow: '0 0 20px rgba(16,185,129,0.3)',
-                }}>✅ Mark as Solved</button>
+                <p style={{ fontSize: 12, color: '#8b949e', marginBottom: 14, lineHeight: 1.7 }}>
+                  Struggling with the concept? This video explains it really well:
+                </p>
+                <a href={theory.url} target="_blank" rel="noopener noreferrer" style={{
+                  display: 'block', background: '#6c63ff15', border: '1px solid #6c63ff30',
+                  borderRadius: 10, padding: '12px', textDecoration: 'none', marginBottom: 8,
+                }}>
+                  <div style={{ fontSize: 12, color: '#a78bfa', fontWeight: 700, marginBottom: 4 }}>{theory.title}</div>
+                  <div style={{ fontSize: 11, color: '#6b6b80' }}>▶ {theory.channel} on YouTube</div>
+                </a>
+              </div>
+
+              <div style={{ background: '#161b22', borderRadius: 16, border: '1px solid #21262d', padding: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#e6edf3', marginBottom: 12 }}>📌 Key Concepts</div>
+                {theory.concepts.map((c, i) => (
+                  <p key={i} style={{ fontSize: 11, color: '#8b949e', margin: '0 0 8px', lineHeight: 1.7 }}>• {c}</p>
+                ))}
               </div>
             </div>
           </div>
@@ -222,28 +224,19 @@ export default function ChallengePage() {
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
         @keyframes spin { to{transform:rotate(360deg)} }
         @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes starPop { from{opacity:0;transform:scale(0)} to{opacity:1;transform:scale(1)} }
         * { box-sizing: border-box; }
       `}</style>
     </div>
   );
 }
 
-function getDifficulty(title) {
-  if (!title) return { stars: 1, label: 'EASY', color: '#10b981', xp: 50 };
-  const t = title.toLowerCase();
-  if (t.includes('null') || t.includes('infinite')) return { stars: 3, label: 'HARD', color: '#ef4444', xp: 150 };
-  if (t.includes('sort') || t.includes('tree')) return { stars: 2, label: 'MEDIUM', color: '#f59e0b', xp: 100 };
-  return { stars: 1, label: 'EASY', color: '#10b981', xp: 50 };
-}
-
 const btnPrimary = {
   background: '#6c63ff', color: '#fff', border: 'none',
-  borderRadius: 10, padding: '12px 24px', fontSize: 13,
+  borderRadius: 10, padding: '12px 22px', fontSize: 12,
   fontWeight: 700, cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace',
 };
 const btnSecondary = {
-  background: 'transparent', color: '#6b6b80', border: '1px solid #2a2a3a',
-  borderRadius: 10, padding: '12px 24px', fontSize: 13,
+  background: 'transparent', color: '#6b6b80', border: '1px solid #21262d',
+  borderRadius: 10, padding: '12px 22px', fontSize: 12,
   cursor: 'pointer', fontFamily: 'JetBrains Mono, monospace',
 };
